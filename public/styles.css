@@ -98,6 +98,16 @@ body {
     transition: border-color 0.2s;
     background: #ffffff;
     color: #1f2937;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+    box-sizing: border-box;
+}
+
+.input-group input[type="datetime-local"] {
+    width: 100%;
+    min-height: 44px; /* iOS touch target */
+    padding: 12px;
 }
 
 @media (prefers-color-scheme: dark) {
@@ -105,6 +115,10 @@ body {
         background: #374151;
         border-color: #4b5563;
         color: #f3f4f6;
+    }
+    
+    .input-group input[type="datetime-local"] {
+        color-scheme: dark; /* Makes iOS picker use dark theme */
     }
 }
 
