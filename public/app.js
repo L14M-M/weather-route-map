@@ -42,6 +42,8 @@ window.initGooglePlaces = function() {
     // Initialize autocomplete after Google is ready
     setupAutocomplete('startLocation', 'startSuggestions');
     setupAutocomplete('endLocation', 'endSuggestions');
+    setupAutocomplete('startLocationMobile', 'startSuggestionsMobile');
+    setupAutocomplete('endLocationMobile', 'endSuggestionsMobile');
 };
 
 // Initialize the map
@@ -98,9 +100,15 @@ let weatherMarkers = [];
 function setDefaultDepartureTime() {
     const now = new Date();
     const localDateTime = new Date(now.getTime() - (now.getTimezoneOffset() * 60000)).toISOString().slice(0, 16);
+    
     const departureInput = document.getElementById('departureTime');
     if (departureInput) {
         departureInput.value = localDateTime;
+    }
+    
+    const departureInputMobile = document.getElementById('departureTimeMobile');
+    if (departureInputMobile) {
+        departureInputMobile.value = localDateTime;
     }
 }
 
@@ -255,7 +263,7 @@ async function displaySuggestions(suggestions, suggestionsDiv, input) {
 // setupAutocomplete('startLocation', 'startSuggestions');
 // setupAutocomplete('endLocation', 'endSuggestions');
 
-// Form submission handler
+// Form submission handlers
 document.getElementById('routeForm').addEventListener('submit', async (e) => {
     e.preventDefault();
     
@@ -263,14 +271,28 @@ document.getElementById('routeForm').addEventListener('submit', async (e) => {
     const endLocation = document.getElementById('endLocation').value;
     const departureTime = document.getElementById('departureTime').value;
     
-    await getRouteWithWeather(startLocation, endLocation, departureTime);
+    await getRouteWithWeather(startLocation, endLocation, departureTime, false);
 });
 
+// Mobile form handler
+const mobileForm = document.getElementById('routeFormMobile');
+if (mobileForm) {
+    mobileForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        
+        const startLocation = document.getElementById('startLocationMobile').value;
+        const endLocation = document.getElementById('endLocationMobile').value;
+        const departureTime = document.getElementById('departureTimeMobile').value;
+        
+        await getRouteWithWeather(startLocation, endLocation, departureTime, true);
+    });
+}
+
 // Main function to get route and weather
-async function getRouteWithWeather(start, end, departureTime) {
-    showLoading(true);
-    hideError();
-    hideRouteInfo();
+async function getRouteWithWeather(start, end, departureTime, isMobile = false) {
+    showLoading(true, isMobile);
+    hideError(isMobile);
+    hideRouteInfo(isMobile);
     clearMap();
     
     try {
@@ -291,12 +313,23 @@ async function getRouteWithWeather(start, end, departureTime) {
         displayRouteWithWeather(route, weatherData);
         
         // Step 6: Show route information
-        displayRouteInfo(route, weatherData);
+        displayRouteInfo(route, weatherData, isMobile);
         
-        showLoading(false);
+        showLoading(false, isMobile);
+        
+        // Navigate to results on mobile
+        if (isMobile) {
+            navigateToResultsSlide();
+        }
+        
+        // Close drawer on mobile after route is calculated
+        if (window.innerWidth <= 768) {
+            const sidebar = document.querySelector('.sidebar');
+            sidebar.classList.remove('open');
+        }
     } catch (error) {
-        showLoading(false);
-        showError(error.message);
+        showLoading(false, isMobile);
+        showError(error.message, isMobile);
         console.error('Error:', error);
     }
 }
@@ -589,7 +622,7 @@ function displayRouteWithWeather(route, weatherData) {
         map.on('click', `route-segment-${i}`, (e) => {
             const properties = e.features[0].properties;
             
-            new mapboxgl.Popup()
+            const popup = new mapboxgl.Popup()
                 .setLngLat(e.lngLat)
                 .setHTML(`
                     <div style="padding: 8px;">
@@ -601,6 +634,14 @@ function displayRouteWithWeather(route, weatherData) {
                     </div>
                 `)
                 .addTo(map);
+            
+            // Fix accessibility warning by removing aria-hidden from close button
+            popup.on('open', () => {
+                const closeButton = document.querySelector('.mapboxgl-popup-close-button');
+                if (closeButton) {
+                    closeButton.removeAttribute('aria-hidden');
+                }
+            });
         });
         
         // Change cursor on hover
@@ -627,14 +668,14 @@ function displayRouteWithWeather(route, weatherData) {
 }
 
 // Display route information in sidebar
-function displayRouteInfo(route, weatherData) {
+function displayRouteInfo(route, weatherData, isMobile = false) {
     const distanceMiles = (route.distance / 1609.34).toFixed(1);
     const durationMin = Math.round(route.duration / 60);
     const hours = Math.floor(durationMin / 60);
     const minutes = durationMin % 60;
     
-    document.getElementById('distance').textContent = `${distanceMiles} mi`;
-    document.getElementById('duration').textContent = hours > 0 
+    const distanceText = `${distanceMiles} mi`;
+    const durationText = hours > 0 
         ? `${hours}h ${minutes}m` 
         : `${minutes}m`;
     
@@ -650,8 +691,27 @@ function displayRouteInfo(route, weatherData) {
         .map(([desc, count]) => `<div>${desc} (${count} points)</div>`)
         .join('');
     
-    document.getElementById('weatherSummary').innerHTML = summaryHTML;
-    document.getElementById('routeInfo').classList.remove('hidden');
+    // Update desktop route info
+    const distance = document.getElementById('distance');
+    const duration = document.getElementById('duration');
+    const weatherSummary = document.getElementById('weatherSummary');
+    const routeInfo = document.getElementById('routeInfo');
+    
+    if (distance) distance.textContent = distanceText;
+    if (duration) duration.textContent = durationText;
+    if (weatherSummary) weatherSummary.innerHTML = summaryHTML;
+    if (routeInfo) routeInfo.classList.remove('hidden');
+    
+    // Update mobile route info
+    const distanceMobile = document.getElementById('distanceMobile');
+    const durationMobile = document.getElementById('durationMobile');
+    const weatherSummaryMobile = document.getElementById('weatherSummaryMobile');
+    const routeInfoMobile = document.getElementById('routeInfoMobile');
+    
+    if (distanceMobile) distanceMobile.textContent = distanceText;
+    if (durationMobile) durationMobile.textContent = durationText;
+    if (weatherSummaryMobile) weatherSummaryMobile.innerHTML = summaryHTML;
+    if (routeInfoMobile) routeInfoMobile.classList.remove('hidden');
 }
 
 // Clear map of route and markers
@@ -679,24 +739,41 @@ function clearMap() {
 }
 
 // UI helper functions
-function showLoading(show) {
-    document.getElementById('loading').classList.toggle('hidden', !show);
-    document.getElementById('submitBtn').disabled = show;
+function showLoading(show, isMobile = false) {
+    const loadingId = isMobile ? 'loadingMobile' : 'loading';
+    const btnId = isMobile ? 'submitBtnMobile' : 'submitBtn';
+    
+    const loadingEl = document.getElementById(loadingId);
+    const btnEl = document.getElementById(btnId);
+    
+    if (loadingEl) loadingEl.classList.toggle('hidden', !show);
+    if (btnEl) btnEl.disabled = show;
 }
 
-function showError(message) {
-    const errorDiv = document.getElementById('error');
-    errorDiv.textContent = message;
-    errorDiv.classList.remove('hidden');
+function showError(message, isMobile = false) {
+    const errorId = isMobile ? 'errorMobile' : 'error';
+    const errorDiv = document.getElementById(errorId);
+    
+    if (errorDiv) {
+        errorDiv.textContent = message;
+        errorDiv.classList.remove('hidden');
+    }
 }
 
-function hideError() {
-    document.getElementById('error').classList.add('hidden');
+function hideError(isMobile = false) {
+    const errorId = isMobile ? 'errorMobile' : 'error';
+    const errorDiv = document.getElementById(errorId);
+    
+    if (errorDiv) errorDiv.classList.add('hidden');
 }
 
-function hideRouteInfo() {
-    document.getElementById('routeInfo').classList.add('hidden');
+function hideRouteInfo(isMobile = false) {
+    const routeInfoId = isMobile ? 'routeInfoMobile' : 'routeInfo';
+    const routeInfo = document.getElementById(routeInfoId);
+    
+    if (routeInfo) routeInfo.classList.add('hidden');
 }
+
 
 // Toggle collapsible sections (mobile only)
 function toggleSection(contentId) {
@@ -758,5 +835,74 @@ function toggleDrawer() {
     if (window.innerWidth <= 768) {
         const sidebar = document.querySelector('.sidebar');
         sidebar.classList.toggle('open');
+    }
+}
+
+// Toggle legend modal
+function toggleLegendModal() {
+    const modal = document.getElementById('legendModal');
+    modal.classList.toggle('hidden');
+}
+
+// Close modal when clicking outside
+document.addEventListener('click', (e) => {
+    const modal = document.getElementById('legendModal');
+    if (e.target === modal) {
+        modal.classList.add('hidden');
+    }
+});
+
+// Mobile carousel functionality
+let currentSlide = 0;
+const carouselContainer = document.querySelector('.mobile-carousel-container');
+const carouselDots = document.querySelectorAll('.carousel-dot');
+
+if (carouselContainer && carouselDots.length > 0) {
+    // Handle scroll snap and update dots
+    carouselContainer.addEventListener('scroll', () => {
+        const slideWidth = carouselContainer.offsetWidth;
+        const scrollLeft = carouselContainer.scrollLeft;
+        const newSlide = Math.round(scrollLeft / slideWidth);
+        
+        if (newSlide !== currentSlide) {
+            currentSlide = newSlide;
+            updateCarouselDots();
+        }
+    });
+    
+    // Handle dot clicks
+    carouselDots.forEach((dot, index) => {
+        dot.addEventListener('click', () => {
+            const slideWidth = carouselContainer.offsetWidth;
+            carouselContainer.scrollTo({
+                left: slideWidth * index,
+                behavior: 'smooth'
+            });
+            currentSlide = index;
+            updateCarouselDots();
+        });
+    });
+    
+    function updateCarouselDots() {
+        carouselDots.forEach((dot, index) => {
+            if (index === currentSlide) {
+                dot.classList.add('active');
+            } else {
+                dot.classList.remove('active');
+            }
+        });
+    }
+}
+
+// Navigate to results slide after calculation
+function navigateToResultsSlide() {
+    if (window.innerWidth <= 768 && carouselContainer) {
+        const slideWidth = carouselContainer.offsetWidth;
+        carouselContainer.scrollTo({
+            left: slideWidth * 1,
+            behavior: 'smooth'
+        });
+        currentSlide = 1;
+        updateCarouselDots();
     }
 }

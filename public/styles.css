@@ -514,6 +514,252 @@ button[type="submit"]:disabled {
     transition: max-height 0.3s ease;
 }
 
+/* Mobile Carousel */
+.mobile-carousel-wrapper {
+    display: none; /* Hidden on desktop */
+}
+
+.mobile-carousel-container {
+    display: flex;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+}
+
+.mobile-carousel-container::-webkit-scrollbar {
+    display: none;
+}
+
+.mobile-carousel-slide {
+    min-width: 100%;
+    scroll-snap-align: start;
+    padding: 0 5px;
+}
+
+.carousel-dots {
+    display: flex;
+    justify-content: center;
+    gap: 8px;
+    padding: 15px 0;
+    margin-bottom: 10px;
+}
+
+.carousel-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: #d1d5db;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+@media (prefers-color-scheme: dark) {
+    .carousel-dot {
+        background: #4b5563;
+    }
+}
+
+.carousel-dot.active {
+    background: #3b82f6;
+    width: 24px;
+    border-radius: 4px;
+}
+
+.mobile-route-placeholder {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 200px;
+    text-align: center;
+    color: #9ca3af;
+    font-size: 14px;
+    padding: 40px 20px;
+}
+
+@media (prefers-color-scheme: dark) {
+    .mobile-route-placeholder {
+        color: #6b7280;
+    }
+}
+
+.mobile-route-placeholder p {
+    max-width: 250px;
+}
+
+.desktop-sidebar-content {
+    display: block; /* Show on desktop */
+}
+
+/* Legend button on map */
+.legend-button {
+    position: absolute;
+    top: 20px;
+    left: 20px;
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    background: #ffffff;
+    border: 2px solid #e5e7eb;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 24px;
+    z-index: 10;
+    transition: all 0.2s ease;
+}
+
+.legend-button:hover {
+    transform: scale(1.1);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+}
+
+.legend-button:active {
+    transform: scale(0.95);
+}
+
+@media (prefers-color-scheme: dark) {
+    .legend-button {
+        background: #374151;
+        border-color: #4b5563;
+    }
+}
+
+/* Legend Modal */
+.legend-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.5);
+    z-index: 2000;
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+}
+
+@media (min-width: 769px) {
+    .legend-modal {
+        align-items: center;
+    }
+}
+
+.legend-modal.hidden {
+    display: none;
+}
+
+.legend-modal-content {
+    background: #ffffff;
+    border-radius: 20px 20px 0 0;
+    max-width: 500px;
+    width: 100%;
+    max-height: 70vh;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    animation: slideUp 0.3s ease;
+}
+
+@media (min-width: 769px) {
+    .legend-modal-content {
+        border-radius: 12px;
+        max-height: 80vh;
+    }
+}
+
+@media (prefers-color-scheme: dark) {
+    .legend-modal-content {
+        background: #1f2937;
+    }
+}
+
+@keyframes slideUp {
+    from {
+        transform: translateY(100%);
+    }
+    to {
+        transform: translateY(0);
+    }
+}
+
+.legend-modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px;
+    border-bottom: 1px solid #e5e7eb;
+}
+
+@media (prefers-color-scheme: dark) {
+    .legend-modal-header {
+        border-bottom-color: #374151;
+    }
+}
+
+.legend-modal-header h4 {
+    margin: 0;
+    font-size: 18px;
+    color: #1f2937;
+}
+
+@media (prefers-color-scheme: dark) {
+    .legend-modal-header h4 {
+        color: #f3f4f6;
+    }
+}
+
+.close-modal {
+    background: none;
+    border: none;
+    font-size: 32px;
+    cursor: pointer;
+    color: #6b7280;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    transition: background 0.2s;
+}
+
+.close-modal:hover {
+    background: #f3f4f6;
+}
+
+@media (prefers-color-scheme: dark) {
+    .close-modal {
+        color: #9ca3af;
+    }
+    
+    .close-modal:hover {
+        background: #374151;
+    }
+}
+
+.legend-modal-body {
+    padding: 20px;
+    overflow-y: auto;
+}
+
+.legend-modal-body .legend-item {
+    display: flex;
+    align-items: center;
+    margin-bottom: 12px;
+    font-size: 15px;
+    color: #374151;
+}
+
+@media (prefers-color-scheme: dark) {
+    .legend-modal-body .legend-item {
+        color: #d1d5db;
+    }
+}
+
 /* Desktop: sections always open */
 @media (min-width: 769px) {
     .collapsible-header {
@@ -523,6 +769,10 @@ button[type="submit"]:disabled {
     .toggle-icon {
         display: none;
     }
+    
+    .mobile-carousel {
+        display: none !important;
+    }
 }
 
 .sidebar-header {
@@ -531,16 +781,6 @@ button[type="submit"]:disabled {
     align-items: center;
     padding: 0; /* Remove padding on desktop */
     cursor: default; /* No pointer on desktop */
-}
-
-/* .sidebar-header h1 {
-     Title styles already defined globally 
-} */
-
-.drawer-toggle {
-    display: none; /* Hidden by default on desktop */
-    font-size: 20px;
-    transition: transform 0.3s ease;
 }
 
 /* Responsive design */
@@ -620,10 +860,6 @@ button[type="submit"]:disabled {
         }
     }
     
-    .drawer-toggle {
-        display: block; /* Show arrow on mobile */
-    }
-    
     .sidebar.open .drawer-toggle {
         transform: rotate(180deg);
     }
@@ -632,6 +868,36 @@ button[type="submit"]:disabled {
         padding: 20px;
         overflow-y: auto;
         max-height: calc(85vh - 70px);
+    }
+    
+    /* Hide desktop content, show mobile carousel */
+    .desktop-sidebar-content {
+        display: none !important;
+    }
+    
+    .mobile-carousel-wrapper {
+        display: block !important;
+    }
+    
+    .mobile-carousel-slide {
+        padding: 0;
+    }
+    
+    .mobile-carousel-slide .input-group input,
+    .mobile-carousel-slide button[type="submit"] {
+        width: calc(100% - 10px);
+    }
+    
+    .route-info.hidden {
+        display: none;
+    }
+    
+    #routeInfoMobile.hidden + .mobile-route-placeholder {
+        display: flex;
+    }
+    
+    #routeInfoMobile:not(.hidden) + .mobile-route-placeholder {
+        display: none;
     }
     
     .sidebar h1 {

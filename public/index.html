@@ -16,65 +16,139 @@
         <div class="sidebar">
             <div class="sidebar-header" onclick="toggleDrawer()">
                 <h1>🗺️ Brian's Route Weather Map</h1>
-                <span class="drawer-toggle">▲</span>
             </div>
             <div class="sidebar-content">
-                <p class="subtitle">Plan your journey with weather insights</p>
-            
-                <form id="routeForm">
-                <div class="input-group">
-                    <label for="startLocation">Starting Location</label>
-                    <input type="text" id="startLocation" placeholder="e.g., Stevensville, MD" required autocomplete="off">
-                    <div id="startSuggestions" class="autocomplete-suggestions"></div>
-                </div>
+                <!-- Desktop view: normal layout -->
+                <div class="desktop-sidebar-content">
+                    <p class="subtitle">Plan your journey with weather insights</p>
                 
-                <div class="input-group">
-                    <label for="endLocation">Destination</label>
-                    <input type="text" id="endLocation" placeholder="e.g., Annapolis, MD" required autocomplete="off">
-                    <div id="endSuggestions" class="autocomplete-suggestions"></div>
-                </div>
+                    <form id="routeForm">
+                    <div class="input-group">
+                        <label for="startLocation">Starting Location</label>
+                        <input type="text" id="startLocation" placeholder="e.g., Stevensville, MD" required autocomplete="off">
+                        <div id="startSuggestions" class="autocomplete-suggestions"></div>
+                    </div>
+                    
+                    <div class="input-group">
+                        <label for="endLocation">Destination</label>
+                        <input type="text" id="endLocation" placeholder="e.g., Annapolis, MD" required autocomplete="off">
+                        <div id="endSuggestions" class="autocomplete-suggestions"></div>
+                    </div>
+                    
+                    <div class="input-group">
+                        <label for="departureTime">Departure Time</label>
+                        <input type="datetime-local" id="departureTime" required>
+                    </div>
+                    
+                    <button type="submit" id="submitBtn">Get Route & Weather</button>
+                </form>
                 
-                <div class="input-group">
-                    <label for="departureTime">Departure Time</label>
-                    <input type="datetime-local" id="departureTime" required>
-                </div>
-                
-                <button type="submit" id="submitBtn">Get Route & Weather</button>
-            </form>
-            
-            <div id="loading" class="loading hidden">
-                <div class="spinner"></div>
-                <p>Calculating route and weather...</p>
-            </div>
-            
-            <div id="error" class="error hidden"></div>
-            
-            <div class="info-legend-container">
-                <div id="routeInfo" class="route-info hidden">
-                    <h3 class="collapsible-header" onclick="toggleSection('routeInfoContent')">
-                        Route Details
-                        <span class="toggle-icon">▼</span>
-                    </h3>
-                    <div id="routeInfoContent" class="collapsible-content">
-                        <div class="info-item">
-                            <strong>Distance:</strong> <span id="distance"></span>
-                        </div>
-                        <div class="info-item">
-                            <strong>Duration:</strong> <span id="duration"></span>
-                        </div>
-                        <div class="info-item">
-                            <strong>Weather Summary:</strong>
-                            <div id="weatherSummary"></div>
+                    <div id="loading" class="loading hidden">
+                        <div class="spinner"></div>
+                        <p>Calculating route and weather...</p>
+                    </div>
+                    
+                    <div id="error" class="error hidden"></div>
+                    
+                    <div id="routeInfo" class="route-info hidden">
+                        <h3 class="collapsible-header" onclick="toggleSection('routeInfoContent')">
+                            Route Details
+                            <span class="toggle-icon">▼</span>
+                        </h3>
+                        <div id="routeInfoContent" class="collapsible-content">
+                            <div class="info-item">
+                                <strong>Distance:</strong> <span id="distance"></span>
+                            </div>
+                            <div class="info-item">
+                                <strong>Duration:</strong> <span id="duration"></span>
+                            </div>
+                            <div class="info-item">
+                                <strong>Weather Summary:</strong>
+                                <div id="weatherSummary"></div>
+                            </div>
                         </div>
                     </div>
                 </div>
                 
-                <div class="legend">
-                    <h4 class="collapsible-header" onclick="toggleSection('legendContent')">
-                        Conditions Legend
-                        <span class="toggle-icon">▼</span>
-                    </h4>
-                <div id="legendContent" class="collapsible-content">
+                <!-- Mobile carousel -->
+                <div class="mobile-carousel-wrapper">
+                    <div class="mobile-carousel-container">
+                        <!-- Slide 1: Inputs -->
+                        <div class="mobile-carousel-slide">
+                            <p class="subtitle">Plan your journey with weather insights</p>
+                        
+                            <form id="routeFormMobile">
+                            <div class="input-group">
+                                <label for="startLocationMobile">Starting Location</label>
+                                <input type="text" id="startLocationMobile" placeholder="e.g., Stevensville, MD" required autocomplete="off">
+                                <div id="startSuggestionsMobile" class="autocomplete-suggestions"></div>
+                            </div>
+                            
+                            <div class="input-group">
+                                <label for="endLocationMobile">Destination</label>
+                                <input type="text" id="endLocationMobile" placeholder="e.g., Annapolis, MD" required autocomplete="off">
+                                <div id="endSuggestionsMobile" class="autocomplete-suggestions"></div>
+                            </div>
+                            
+                            <div class="input-group">
+                                <label for="departureTimeMobile">Departure Time</label>
+                                <input type="datetime-local" id="departureTimeMobile" required>
+                            </div>
+                            
+                            <button type="submit" id="submitBtnMobile">Get Route & Weather</button>
+                        </form>
+                        
+                            <div id="loadingMobile" class="loading hidden">
+                                <div class="spinner"></div>
+                                <p>Calculating route and weather...</p>
+                            </div>
+                            
+                            <div id="errorMobile" class="error hidden"></div>
+                        </div>
+                        
+                        <!-- Slide 2: Route Details -->
+                        <div class="mobile-carousel-slide">
+                            <div id="routeInfoMobile" class="route-info hidden">
+                                <h3>Route Details</h3>
+                                <div class="info-item">
+                                    <strong>Distance:</strong> <span id="distanceMobile"></span>
+                                </div>
+                                <div class="info-item">
+                                    <strong>Duration:</strong> <span id="durationMobile"></span>
+                                </div>
+                                <div class="info-item">
+                                    <strong>Weather Summary:</strong>
+                                    <div id="weatherSummaryMobile"></div>
+                                </div>
+                            </div>
+                            <div class="mobile-route-placeholder">
+                                <p>📍 Enter your route details and calculate to see results here</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="carousel-dots">
+                        <span class="carousel-dot active" data-slide="0"></span>
+                        <span class="carousel-dot" data-slide="1"></span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div id="map" class="map">
+            <!-- Legend button on map -->
+            <button id="legendButton" class="legend-button" onclick="toggleLegendModal()">
+                <span>🌦️</span>
+            </button>
+        </div>
+        
+        <!-- Legend Modal -->
+        <div id="legendModal" class="legend-modal hidden">
+            <div class="legend-modal-content">
+                <div class="legend-modal-header">
+                    <h4>Conditions Legend</h4>
+                    <button class="close-modal" onclick="toggleLegendModal()">×</button>
+                </div>
+                <div class="legend-modal-body">
                     <div class="legend-item">
                         <span class="color-box" style="background: #4ade80;"></span>
                         <span>Clear/Sunny</span>
@@ -117,11 +191,7 @@
                     </div>
                 </div>
             </div>
-            </div>
-            </div>
         </div>
-        
-        <div id="map" class="map"></div>
     </div>
     
     <script src='https://api.mapbox.com/mapbox-gl-js/v3.0.1/mapbox-gl.js'></script>
