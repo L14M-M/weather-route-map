@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Brian's Route Weather Map</title>
+    <link rel="icon" type="image/x-icon" href="/favicon.ico">
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+    <link href='https://api.mapbox.com/mapbox-gl-js/v3.0.1/mapbox-gl.css' rel='stylesheet' />
+    <link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+    <div class="container">
+        <div class="sidebar">
+            <h1>🗺️ Brian's Route Weather Map</h1>
+            <p class="subtitle">Plan your journey with weather insights</p>
+            
+            <form id="routeForm">
+                <div class="input-group">
+                    <label for="startLocation">Starting Location</label>
+                    <input type="text" id="startLocation" placeholder="e.g., Stevensville, MD" required autocomplete="off">
+                    <div id="startSuggestions" class="autocomplete-suggestions"></div>
+                </div>
+                
+                <div class="input-group">
+                    <label for="endLocation">Destination</label>
+                    <input type="text" id="endLocation" placeholder="e.g., Annapolis, MD" required autocomplete="off">
+                    <div id="endSuggestions" class="autocomplete-suggestions"></div>
+                </div>
+                
+                <div class="input-group">
+                    <label for="departureTime">Departure Time</label>
+                    <input type="datetime-local" id="departureTime" required>
+                </div>
+                
+                <button type="submit" id="submitBtn">Get Route & Weather</button>
+            </form>
+            
+            <div id="loading" class="loading hidden">
+                <div class="spinner"></div>
+                <p>Calculating route and weather...</p>
+            </div>
+            
+            <div id="error" class="error hidden"></div>
+            
+            <div class="info-legend-container">
+                <div id="routeInfo" class="route-info hidden">
+                    <h3 class="collapsible-header" onclick="toggleSection('routeInfoContent')">
+                        Route Details
+                        <span class="toggle-icon">▼</span>
+                    </h3>
+                    <div id="routeInfoContent" class="collapsible-content">
+                        <div class="info-item">
+                            <strong>Distance:</strong> <span id="distance"></span>
+                        </div>
+                        <div class="info-item">
+                            <strong>Duration:</strong> <span id="duration"></span>
+                        </div>
+                        <div class="info-item">
+                            <strong>Weather Summary:</strong>
+                            <div id="weatherSummary"></div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="legend">
+                    <h4 class="collapsible-header" onclick="toggleSection('legendContent')">
+                        Conditions Legend
+                        <span class="toggle-icon">▼</span>
+                    </h4>
+                <div id="legendContent" class="collapsible-content">
+                    <div class="legend-item">
+                        <span class="color-box" style="background: #4ade80;"></span>
+                        <span>Clear/Sunny</span>
+                    </div>
+                    <div class="legend-item">
+                        <span class="color-box" style="background: #86efac;"></span>
+                        <span>Cloudy</span>
+                    </div>
+                    <div class="legend-item">
+                        <span class="color-box" style="background: #9ca3af;"></span>
+                        <span>Fog</span>
+                    </div>
+                    <div class="legend-item">
+                        <span class="color-box" style="background: #60a5fa;"></span>
+                        <span>Drizzle/Light Rain</span>
+                    </div>
+                    <div class="legend-item">
+                        <span class="color-box" style="background: #3b82f6;"></span>
+                        <span>Rain</span>
+                    </div>
+                    <div class="legend-item">
+                        <span class="color-box" style="background: #1e40af;"></span>
+                        <span>Heavy Rain</span>
+                    </div>
+                    <div class="legend-item">
+                        <span class="color-box" style="background: #e9d5ff;"></span>
+                        <span>Light Snow</span>
+                    </div>
+                    <div class="legend-item">
+                        <span class="color-box" style="background: #a855f7;"></span>
+                        <span>Snow</span>
+                    </div>
+                    <div class="legend-item">
+                        <span class="color-box" style="background: #9333ea;"></span>
+                        <span>Heavy Snow</span>
+                    </div>
+                    <div class="legend-item">
+                        <span class="color-box" style="background: #ef4444;"></span>
+                        <span>Thunderstorm</span>
+                    </div>
+                </div>
+            </div>
+            </div>
+        </div>
+        
+        <div id="map" class="map"></div>
+    </div>
+    
+    <script src='https://api.mapbox.com/mapbox-gl-js/v3.0.1/mapbox-gl.js'></script>
+    <script src="/app.js"></script>
+</body>
+</html>
