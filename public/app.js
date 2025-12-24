@@ -48,9 +48,15 @@ window.initGooglePlaces = function() {
 function initializeMap() {
     mapboxgl.accessToken = MAPBOX_API_KEY;
 
+    // Detect system color scheme preference
+    const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+    const mapStyle = prefersDark 
+        ? 'mapbox://styles/mapbox/navigation-night-v1' 
+        : 'mapbox://styles/mapbox/navigation-day-v1';
+
     map = new mapboxgl.Map({
         container: 'map',
-        style: 'mapbox://styles/mapbox/streets-v12',
+        style: mapStyle,
         center: [-98.5795, 39.8283], // Center of USA
         zoom: 4
     });
@@ -60,6 +66,14 @@ function initializeMap() {
     
     // Add fullscreen control
     map.addControl(new mapboxgl.FullscreenControl());
+    
+    // Listen for system color scheme changes
+    window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', (e) => {
+        const newStyle = e.matches 
+            ? 'mapbox://styles/mapbox/dark-v11' 
+            : 'mapbox://styles/mapbox/streets-v12';
+        map.setStyle(newStyle);
+    });
     
     // Get user location after map is initialized
     getUserLocation();

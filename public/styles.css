@@ -10,6 +10,16 @@ body {
     overflow: hidden;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
+    background: #ffffff;
+    color: #1f2937;
+}
+
+/* Dark mode support */
+@media (prefers-color-scheme: dark) {
+    body {
+        background: #1f2937;
+        color: #f3f4f6;
+    }
 }
 
 .container {
@@ -29,16 +39,35 @@ body {
     -webkit-overflow-scrolling: touch; /* Smooth scrolling on iOS */
 }
 
+@media (prefers-color-scheme: dark) {
+    .sidebar {
+        background: #111827;
+        box-shadow: 2px 0 10px rgba(0, 0, 0, 0.5);
+    }
+}
+
 .sidebar h1 {
     font-size: 28px;
     color: #1f2937;
     margin-bottom: 8px;
 }
 
+@media (prefers-color-scheme: dark) {
+    .sidebar h1 {
+        color: #f3f4f6;
+    }
+}
+
 .subtitle {
     color: #6b7280;
     margin-bottom: 30px;
     font-size: 14px;
+}
+
+@media (prefers-color-scheme: dark) {
+    .subtitle {
+        color: #9ca3af;
+    }
 }
 
 .input-group {
@@ -54,6 +83,12 @@ body {
     font-size: 14px;
 }
 
+@media (prefers-color-scheme: dark) {
+    .input-group label {
+        color: #d1d5db;
+    }
+}
+
 .input-group input {
     width: 100%;
     padding: 12px;
@@ -61,6 +96,16 @@ body {
     border-radius: 8px;
     font-size: 14px;
     transition: border-color 0.2s;
+    background: #ffffff;
+    color: #1f2937;
+}
+
+@media (prefers-color-scheme: dark) {
+    .input-group input {
+        background: #374151;
+        border-color: #4b5563;
+        color: #f3f4f6;
+    }
 }
 
 .input-group input:focus {
@@ -84,6 +129,14 @@ body {
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
 }
 
+@media (prefers-color-scheme: dark) {
+    .autocomplete-suggestions {
+        background: #374151;
+        border-color: #4b5563;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.5);
+    }
+}
+
 .autocomplete-suggestions.active {
     display: block;
 }
@@ -96,6 +149,12 @@ body {
     transition: background-color 0.15s;
 }
 
+@media (prefers-color-scheme: dark) {
+    .suggestion-item {
+        border-bottom-color: #4b5563;
+    }
+}
+
 .suggestion-item:last-child {
     border-bottom: none;
 }
@@ -104,15 +163,35 @@ body {
     background-color: #f3f4f6;
 }
 
+@media (prefers-color-scheme: dark) {
+    .suggestion-item:hover {
+        background-color: #4b5563;
+    }
+}
+
 .suggestion-item .place-name {
     color: #1f2937;
     font-weight: 500;
+}
+
+@media (prefers-color-scheme: dark) {
+    .suggestion-item .place-name {
+        color: #f3f4f6;
+    }
 }
 
 .suggestion-item .place-address {
     color: #6b7280;
     font-size: 12px;
     margin-top: 2px;
+}
+
+@media (prefers-color-scheme: dark) {
+    .suggestion-item .place-address {
+        color: #9ca3af;
+    }
+}
+
 button[type="submit"] {
     width: 100%;
     padding: 14px;
@@ -140,8 +219,24 @@ button[type="submit"]:active {
 button[type="submit"]:disabled {
     background: #9ca3af;
     cursor: not-allowed;
-}   background: #9ca3af;
-    cursor: not-allowed;
+}
+
+@media (prefers-color-scheme: dark) {
+    button[type="submit"] {
+        background: #2563eb;
+    }
+    
+    button[type="submit"]:hover {
+        background: #1d4ed8;
+    }
+    
+    button[type="submit"]:active {
+        background: #1e40af;
+    }
+    
+    button[type="submit"]:disabled {
+        background: #4b5563;
+    }
 }
 
 .loading {
@@ -150,6 +245,12 @@ button[type="submit"]:disabled {
     background: #eff6ff;
     border-radius: 8px;
     text-align: center;
+}
+
+@media (prefers-color-scheme: dark) {
+    .loading {
+        background: #1e3a5f;
+    }
 }
 
 .spinner {
@@ -162,6 +263,13 @@ button[type="submit"]:disabled {
     margin: 0 auto 10px;
 }
 
+@media (prefers-color-scheme: dark) {
+    .spinner {
+        border-color: #4b5563;
+        border-top-color: #60a5fa;
+    }
+}
+
 @keyframes spin {
     0% { transform: rotate(0deg); }
     100% { transform: rotate(360deg); }
@@ -170,6 +278,12 @@ button[type="submit"]:disabled {
 .loading p {
     color: #1f2937;
     font-size: 14px;
+}
+
+@media (prefers-color-scheme: dark) {
+    .loading p {
+        color: #e5e7eb;
+    }
 }
 
 .error {
@@ -182,11 +296,25 @@ button[type="submit"]:disabled {
     font-size: 14px;
 }
 
+@media (prefers-color-scheme: dark) {
+    .error {
+        background: #7f1d1d;
+        border-left-color: #dc2626;
+        color: #fecaca;
+    }
+}
+
 .route-info {
     margin-top: 30px;
     padding: 20px;
     background: #f9fafb;
     border-radius: 8px;
+}
+
+@media (prefers-color-scheme: dark) {
+    .route-info {
+        background: #1f2937;
+    }
 }
 
 .route-info h3 {
@@ -195,10 +323,22 @@ button[type="submit"]:disabled {
     margin-bottom: 15px;
 }
 
+@media (prefers-color-scheme: dark) {
+    .route-info h3 {
+        color: #f3f4f6;
+    }
+}
+
 .info-item {
     margin-bottom: 12px;
     font-size: 14px;
     color: #374151;
+}
+
+@media (prefers-color-scheme: dark) {
+    .info-item {
+        color: #d1d5db;
+    }
 }
 
 .info-item:last-child {
@@ -231,10 +371,22 @@ button[type="submit"]:disabled {
     border-radius: 8px;
 }
 
+@media (prefers-color-scheme: dark) {
+    .legend {
+        background: #1f2937;
+    }
+}
+
 .legend h4 {
     font-size: 16px;
     color: #1f2937;
     margin-bottom: 15px;
+}
+
+@media (prefers-color-scheme: dark) {
+    .legend h4 {
+        color: #f3f4f6;
+    }
 }
 
 .legend-item {
@@ -245,12 +397,24 @@ button[type="submit"]:disabled {
     color: #374151;
 }
 
+@media (prefers-color-scheme: dark) {
+    .legend-item {
+        color: #d1d5db;
+    }
+}
+
 .color-box {
     width: 20px;
     height: 20px;
     border-radius: 4px;
     margin-right: 12px;
     border: 1px solid #e5e7eb;
+}
+
+@media (prefers-color-scheme: dark) {
+    .color-box {
+        border-color: #4b5563;
+    }
 }
 
 .hidden {
@@ -269,9 +433,23 @@ button[type="submit"]:disabled {
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
 }
 
+@media (prefers-color-scheme: dark) {
+    .mapboxgl-popup-content {
+        background: #374151;
+        color: #f3f4f6;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.5);
+    }
+}
+
 .mapboxgl-popup-close-button {
     font-size: 20px;
     padding: 8px;
+}
+
+@media (prefers-color-scheme: dark) {
+    .mapboxgl-popup-close-button {
+        color: #f3f4f6;
+    }
 }
 
 /* Weather marker styling */
