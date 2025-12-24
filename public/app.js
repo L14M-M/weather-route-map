@@ -62,10 +62,14 @@ function initializeMap() {
     });
 
     // Add navigation controls
-    map.addControl(new mapboxgl.NavigationControl());
+    map.addControl(new mapboxgl.NavigationControl(), 'top-right');
     
-    // Add fullscreen control
-    map.addControl(new mapboxgl.FullscreenControl());
+    // Add fullscreen control (only if supported by browser)
+    if (document.documentElement.requestFullscreen) {
+        map.addControl(new mapboxgl.FullscreenControl({
+            container: document.querySelector('body')
+        }), 'top-right');
+    }
     
     // Listen for system color scheme changes
     window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', (e) => {
