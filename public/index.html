@@ -14,10 +14,14 @@
 <body>
     <div class="container">
         <div class="sidebar">
-            <h1>🗺️ Brian's Route Weather Map</h1>
-            <p class="subtitle">Plan your journey with weather insights</p>
+            <div class="sidebar-header" onclick="toggleDrawer()">
+                <h1>🗺️ Brian's Route Weather Map</h1>
+                <span class="drawer-toggle">▲</span>
+            </div>
+            <div class="sidebar-content">
+                <p class="subtitle">Plan your journey with weather insights</p>
             
-            <form id="routeForm">
+                <form id="routeForm">
                 <div class="input-group">
                     <label for="startLocation">Starting Location</label>
                     <input type="text" id="startLocation" placeholder="e.g., Stevensville, MD" required autocomplete="off">
@@ -112,6 +116,7 @@
                         <span>Thunderstorm</span>
                     </div>
                 </div>
+            </div>
             </div>
             </div>
         </div>

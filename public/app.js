@@ -79,6 +79,13 @@ function initializeMap() {
         map.setStyle(newStyle);
     });
     
+    // Resize map after initialization to ensure proper sizing
+    map.on('load', () => {
+        setTimeout(() => {
+            map.resize();
+        }, 100);
+    });
+    
     // Get user location after map is initialized
     getUserLocation();
 }
@@ -745,3 +752,11 @@ window.addEventListener('resize', () => {
         }
     });
 });
+
+// Toggle drawer for mobile
+function toggleDrawer() {
+    if (window.innerWidth <= 768) {
+        const sidebar = document.querySelector('.sidebar');
+        sidebar.classList.toggle('open');
+    }
+}
