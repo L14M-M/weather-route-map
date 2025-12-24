@@ -58,6 +58,9 @@ function initializeMap() {
     // Add navigation controls
     map.addControl(new mapboxgl.NavigationControl());
     
+    // Add fullscreen control
+    map.addControl(new mapboxgl.FullscreenControl());
+    
     // Get user location after map is initialized
     getUserLocation();
 }
