@@ -838,6 +838,94 @@ function toggleDrawer() {
     }
 }
 
+// Swipe gesture support for drawer
+let touchStartY = 0;
+let touchEndY = 0;
+let isDragging = false;
+
+function initDrawerSwipe() {
+    const sidebar = document.querySelector('.sidebar');
+    const sidebarHeader = document.querySelector('.sidebar-header');
+    
+    if (!sidebar || !sidebarHeader) return;
+    
+    // Only enable on mobile
+    if (window.innerWidth > 768) return;
+    
+    sidebarHeader.addEventListener('touchstart', (e) => {
+        touchStartY = e.touches[0].clientY;
+        isDragging = true;
+        sidebar.style.transition = 'none';
+    }, { passive: true });
+    
+    sidebarHeader.addEventListener('touchmove', (e) => {
+        if (!isDragging) return;
+        
+        touchEndY = e.touches[0].clientY;
+        const deltaY = touchEndY - touchStartY;
+        
+        const isOpen = sidebar.classList.contains('open');
+        
+        if (isOpen) {
+            // When open (at translateY(0)), allow dragging down
+            if (deltaY > 0) {
+                sidebar.style.transform = `translateY(${deltaY}px)`;
+            }
+        } else {
+            // When closed (at translateY(calc(100% - 70px))), allow dragging up
+            if (deltaY < 0) {
+                // Start from closed position and move up as user drags
+                const sidebarHeight = sidebar.offsetHeight;
+                const closedOffset = sidebarHeight - 70; // The "100% - 70px" in pixels
+                const dragAmount = Math.abs(deltaY);
+                const newOffset = Math.max(0, closedOffset - dragAmount);
+                sidebar.style.transform = `translateY(${newOffset}px)`;
+            }
+        }
+    }, { passive: true });
+    
+    const handleTouchEnd = () => {
+        if (!isDragging) return;
+        
+        isDragging = false;
+        sidebar.style.transition = '';
+        sidebar.style.transform = '';
+        
+        const swipeDistance = Math.abs(touchEndY - touchStartY);
+        const deltaY = touchEndY - touchStartY;
+        const threshold = 50; // Minimum swipe distance in pixels
+        
+        const isOpen = sidebar.classList.contains('open');
+        
+        if (deltaY < 0 && !isOpen && swipeDistance > threshold) {
+            // Swipe up when closed - open drawer
+            sidebar.classList.add('open');
+        } else if (deltaY > 0 && isOpen && swipeDistance > threshold) {
+            // Swipe down when open - close drawer
+            sidebar.classList.remove('open');
+        }
+        
+        // Reset
+        touchStartY = 0;
+        touchEndY = 0;
+    };
+    
+    sidebarHeader.addEventListener('touchend', handleTouchEnd, { passive: true });
+    sidebarHeader.addEventListener('touchcancel', handleTouchEnd, { passive: true });
+}
+
+// Initialize drawer swipe on load
+if (window.innerWidth <= 768) {
+    initDrawerSwipe();
+}
+
+// Re-initialize on resize
+window.addEventListener('resize', () => {
+    if (window.innerWidth <= 768) {
+        initDrawerSwipe();
+    }
+});
+
 // Toggle legend modal
 function toggleLegendModal() {
     const modal = document.getElementById('legendModal');
