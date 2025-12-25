@@ -89,6 +89,55 @@ body {
     }
 }
 
+.input-wrapper {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.input-wrapper input {
+    flex: 1;
+    padding-right: 40px;
+}
+
+.clear-input {
+    position: absolute;
+    right: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    background: none;
+    border: none;
+    color: #9ca3af;
+    font-size: 24px;
+    cursor: pointer;
+    padding: 0;
+    width: 24px;
+    height: 24px;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    line-height: 1;
+    transition: color 0.2s;
+}
+
+.clear-input:hover {
+    color: #6b7280;
+}
+
+@media (prefers-color-scheme: dark) {
+    .clear-input {
+        color: #6b7280;
+    }
+    
+    .clear-input:hover {
+        color: #9ca3af;
+    }
+}
+
+.input-wrapper input:not(:placeholder-shown) ~ .clear-input {
+    display: flex;
+}
+
 .input-group input {
     width: 100%;
     padding: 12px;

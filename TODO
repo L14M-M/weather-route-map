@@ -1,0 +1,3 @@
+Change date/time selector to only go so far in the future/past that weather data exists (e.g. can't go further than 2 weeks if API only has 2 week forecast)
+Route disappears when closing in/out of tab
+allow saving routes

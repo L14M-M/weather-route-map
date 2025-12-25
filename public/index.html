@@ -26,13 +26,19 @@
                     <form id="routeForm">
                     <div class="input-group">
                         <label for="startLocation">Starting Location</label>
-                        <input type="text" id="startLocation" placeholder="e.g., Stevensville, MD" required autocomplete="off">
+                        <div class="input-wrapper">
+                            <input type="text" id="startLocation" placeholder="e.g., Stevensville, MD" required autocomplete="off">
+                            <button type="button" class="clear-input" onclick="clearInput('startLocation')">×</button>
+                        </div>
                         <div id="startSuggestions" class="autocomplete-suggestions"></div>
                     </div>
                     
                     <div class="input-group">
                         <label for="endLocation">Destination</label>
-                        <input type="text" id="endLocation" placeholder="e.g., Annapolis, MD" required autocomplete="off">
+                        <div class="input-wrapper">
+                            <input type="text" id="endLocation" placeholder="e.g., Annapolis, MD" required autocomplete="off">
+                            <button type="button" class="clear-input" onclick="clearInput('endLocation')">×</button>
+                        </div>
                         <div id="endSuggestions" class="autocomplete-suggestions"></div>
                     </div>
                     
@@ -97,13 +103,19 @@
                             <form id="routeFormMobile">
                             <div class="input-group">
                                 <label for="startLocationMobile">Starting Location</label>
-                                <input type="text" id="startLocationMobile" placeholder="e.g., Stevensville, MD" required autocomplete="off">
+                                <div class="input-wrapper">
+                                    <input type="text" id="startLocationMobile" placeholder="e.g., Stevensville, MD" required autocomplete="off">
+                                    <button type="button" class="clear-input" onclick="clearInput('startLocationMobile')">×</button>
+                                </div>
                                 <div id="startSuggestionsMobile" class="autocomplete-suggestions"></div>
                             </div>
                             
                             <div class="input-group">
                                 <label for="endLocationMobile">Destination</label>
-                                <input type="text" id="endLocationMobile" placeholder="e.g., Annapolis, MD" required autocomplete="off">
+                                <div class="input-wrapper">
+                                    <input type="text" id="endLocationMobile" placeholder="e.g., Annapolis, MD" required autocomplete="off">
+                                    <button type="button" class="clear-input" onclick="clearInput('endLocationMobile')">×</button>
+                                </div>
                                 <div id="endSuggestionsMobile" class="autocomplete-suggestions"></div>
                             </div>
                             

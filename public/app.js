@@ -324,6 +324,14 @@ async function getRouteWithWeather(start, end, departureTime, isMobile = false) 
         // Step 6: Show route information
         displayRouteInfo(route, weatherData, isMobile);
         
+        // Save route to sessionStorage for persistence
+        saveRouteToCache({
+            route,
+            weatherData,
+            addresses: currentRouteAddresses,
+            departureTime
+        });
+        
         showLoading(false, isMobile);
         
         // Navigate to results on mobile
@@ -1071,6 +1079,78 @@ function openInGoogleMaps() {
     const url = `https://www.google.com/maps/dir/?api=1&origin=${encodeURIComponent(start)}&destination=${encodeURIComponent(end)}`;
     window.open(url, '_blank');
 }
+
+// Clear input field
+function clearInput(inputId) {
+    const input = document.getElementById(inputId);
+    if (input) {
+        input.value = '';
+        input.focus();
+        // Trigger input event to hide autocomplete if open
+        input.dispatchEvent(new Event('input'));
+    }
+}
+
+// Save route to sessionStorage
+function saveRouteToCache(data) {
+    try {
+        sessionStorage.setItem('cachedRoute', JSON.stringify(data));
+    } catch (e) {
+        console.error('Failed to cache route:', e);
+    }
+}
+
+// Restore route from sessionStorage
+function restoreRouteFromCache() {
+    try {
+        const cached = sessionStorage.getItem('cachedRoute');
+        if (!cached) return;
+        
+        const { route, weatherData, addresses, departureTime } = JSON.parse(cached);
+        
+        // Restore addresses
+        currentRouteAddresses = addresses;
+        
+        // Restore form values
+        const startInput = document.getElementById('startLocation');
+        const endInput = document.getElementById('endLocation');
+        const departureInput = document.getElementById('departureTime');
+        const startInputMobile = document.getElementById('startLocationMobile');
+        const endInputMobile = document.getElementById('endLocationMobile');
+        const departureInputMobile = document.getElementById('departureTimeMobile');
+        
+        if (startInput) startInput.value = addresses.start;
+        if (endInput) endInput.value = addresses.end;
+        if (departureInput) departureInput.value = departureTime;
+        if (startInputMobile) startInputMobile.value = addresses.start;
+        if (endInputMobile) endInputMobile.value = addresses.end;
+        if (departureInputMobile) departureInputMobile.value = departureTime;
+        
+        // Restore map and UI
+        displayRouteWithWeather(route, weatherData);
+        displayRouteInfo(route, weatherData, false);
+        
+        console.log('Route restored from cache');
+    } catch (e) {
+        console.error('Failed to restore route:', e);
+        sessionStorage.removeItem('cachedRoute');
+    }
+}
+
+// Listen for page visibility changes to restore route
+document.addEventListener('visibilitychange', () => {
+    if (!document.hidden && map) {
+        // Page became visible - check if we need to restore route
+        restoreRouteFromCache();
+    }
+});
+
+// Restore route on initial page load
+window.addEventListener('load', () => {
+    if (map) {
+        restoreRouteFromCache();
+    }
+});
 
 // Close modal when clicking outside
 document.addEventListener('click', (e) => {
