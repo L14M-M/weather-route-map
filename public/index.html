@@ -93,13 +93,16 @@
                     </div>
                 </div>
                 
+                <!-- Desktop Clear Route button at bottom -->
+                <button id="clearRouteBtn" class="clear-route-btn desktop-only hidden" onclick="clearRoute()">
+                    Clear Route
+                </button>
+                
                 <!-- Mobile carousel -->
                 <div class="mobile-carousel-wrapper">
                     <div class="mobile-carousel-container">
                         <!-- Slide 1: Inputs -->
                         <div class="mobile-carousel-slide">
-                            <p class="subtitle">Plan your journey with weather insights</p>
-                        
                             <form id="routeFormMobile">
                             <div class="input-group">
                                 <label for="startLocationMobile">Starting Location</label>
@@ -166,9 +169,15 @@
                                     </button>
                                 </div>
                             </div>
+                            
                             <div class="mobile-route-placeholder">
                                 <p>📍 Enter your route details and calculate to see results here</p>
                             </div>
+                            
+                            <!-- Clear Route button at bottom of this slide -->
+                            <button id="clearRouteBtnMobile" class="clear-route-btn hidden" onclick="clearRoute()">
+                                Clear Route
+                            </button>
                         </div>
                     </div>
                     <div class="carousel-dots">

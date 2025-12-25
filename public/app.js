@@ -88,18 +88,24 @@ function initializeMap() {
         }, 100);
         
         // Restore cached route when map loads
+        console.log('Map loaded, attempting restore...');
         restoreRouteFromCache();
     });
     
     // Also restore when map style finishes loading (happens on app resume)
     map.on('styledata', () => {
-        // Only restore if we have cached data and layers were cleared
+        // Check if this is a style reload (not initial load) and we have cached data
         const cached = sessionStorage.getItem('cachedRoute');
-        if (cached && !map.getSource('route-segment-0')) {
-            console.log('Map style reloaded, restoring route...');
-            setTimeout(() => {
-                restoreRouteFromCache();
-            }, 100);
+        if (cached && map.isStyleLoaded()) {
+            // Check if route layers are missing
+            const hasRoute = map.getSource('route-segment-0');
+            if (!hasRoute) {
+                console.log('Map style reloaded, route layers missing, restoring...');
+                // Wait a bit for style to fully settle
+                setTimeout(() => {
+                    restoreRouteFromCache();
+                }, 300);
+            }
         }
     });
     
@@ -111,6 +117,7 @@ function initializeMap() {
 let map = null;
 let weatherMarkers = [];
 let currentRouteAddresses = { start: '', end: '', startCoords: null, endCoords: null };
+let isRestoringRoute = false;
 
 // Set default departure time to now (in local timezone)
 function setDefaultDepartureTime() {
@@ -815,23 +822,27 @@ function displayRouteInfo(route, weatherData, isMobile = false) {
     const weatherModalContent = document.getElementById('weatherModalContent');
     const routeInfo = document.getElementById('routeInfo');
     const navigateSection = document.getElementById('navigateSection');
+    const clearRouteBtn = document.getElementById('clearRouteBtn');
     
     if (distance) distance.textContent = distanceText;
     if (duration) duration.textContent = durationText;
     if (weatherModalContent) weatherModalContent.innerHTML = summaryHTML;
     if (routeInfo) routeInfo.classList.remove('hidden');
     if (navigateSection) navigateSection.classList.remove('hidden');
+    if (clearRouteBtn) clearRouteBtn.classList.remove('hidden');
     
     // Update mobile route info (shares same weather modal)
     const distanceMobile = document.getElementById('distanceMobile');
     const durationMobile = document.getElementById('durationMobile');
     const routeInfoMobile = document.getElementById('routeInfoMobile');
     const navigateSectionMobile = document.getElementById('navigateSectionMobile');
+    const clearRouteBtnMobile = document.getElementById('clearRouteBtnMobile');
     
     if (distanceMobile) distanceMobile.textContent = distanceText;
     if (durationMobile) durationMobile.textContent = durationText;
     if (routeInfoMobile) routeInfoMobile.classList.remove('hidden');
     if (navigateSectionMobile) navigateSectionMobile.classList.remove('hidden');
+    if (clearRouteBtnMobile) clearRouteBtnMobile.classList.remove('hidden');
 }
 
 // Clear map of route and markers
@@ -1117,18 +1128,46 @@ function saveRouteToCache(data) {
 
 // Restore route from sessionStorage
 function restoreRouteFromCache() {
+    // Prevent multiple simultaneous restore attempts
+    if (isRestoringRoute) {
+        console.log('Restore already in progress, skipping...');
+        return;
+    }
+    
     try {
         const cached = sessionStorage.getItem('cachedRoute');
-        if (!cached) return;
+        if (!cached) {
+            console.log('No cached route found');
+            return;
+        }
+        
+        // Check if map is ready
+        if (!map) {
+            console.log('Map not initialized, cannot restore');
+            return;
+        }
+        
+        // Check if route is already displayed
+        if (map.getSource('route-segment-0')) {
+            console.log('Route already displayed, skipping restore');
+            return;
+        }
+        
+        if (!map.loaded() || !map.isStyleLoaded()) {
+            console.log('Map not ready, will retry...');
+            setTimeout(restoreRouteFromCache, 300);
+            return;
+        }
+        
+        isRestoringRoute = true;
+        console.log('Starting route restoration...');
         
         const { route, weatherData, addresses, departureTime } = JSON.parse(cached);
         
-        // Make sure map is ready before restoring
-        if (!map || !map.loaded()) {
-            console.log('Map not ready, will retry...');
-            setTimeout(restoreRouteFromCache, 200);
-            return;
-        }
+        // Convert time strings back to Date objects
+        weatherData.forEach(w => {
+            w.time = new Date(w.time);
+        });
         
         // Restore addresses
         currentRouteAddresses = addresses;
@@ -1149,16 +1188,30 @@ function restoreRouteFromCache() {
         if (departureInputMobile) departureInputMobile.value = departureTime;
         
         // Clear existing route layers first
-        clearMap();
+        try {
+            clearMap();
+        } catch (e) {
+            console.warn('Error clearing map:', e);
+        }
         
-        // Restore map and UI
-        displayRouteWithWeather(route, weatherData);
-        displayRouteInfo(route, weatherData, false);
+        // Wait a frame for map to be ready
+        requestAnimationFrame(() => {
+            try {
+                // Restore map and UI
+                displayRouteWithWeather(route, weatherData);
+                displayRouteInfo(route, weatherData, false);
+                console.log('✓ Route successfully restored from cache');
+            } catch (e) {
+                console.error('Error displaying route:', e);
+            } finally {
+                isRestoringRoute = false;
+            }
+        });
         
-        console.log('Route restored from cache');
     } catch (e) {
         console.error('Failed to restore route:', e);
         sessionStorage.removeItem('cachedRoute');
+        isRestoringRoute = false;
     }
 }
 
@@ -1182,6 +1235,50 @@ window.addEventListener('load', () => {
         }
     }, 100);
 });
+
+// Clear route, cache, and inputs
+function clearRoute() {
+    // Clear sessionStorage
+    sessionStorage.removeItem('cachedRoute');
+    
+    // Clear all inputs
+    const inputs = [
+        'startLocation',
+        'endLocation',
+        'departureTime',
+        'startLocationMobile',
+        'endLocationMobile',
+        'departureTimeMobile'
+    ];
+    
+    inputs.forEach(id => {
+        const input = document.getElementById(id);
+        if (input) input.value = '';
+    });
+    
+    // Clear map
+    clearMap();
+    
+    // Hide route info and navigation sections
+    const routeInfo = document.getElementById('routeInfo');
+    const routeInfoMobile = document.getElementById('routeInfoMobile');
+    const navigateSection = document.getElementById('navigateSection');
+    const navigateSectionMobile = document.getElementById('navigateSectionMobile');
+    const clearRouteBtn = document.getElementById('clearRouteBtn');
+    const clearRouteBtnMobile = document.getElementById('clearRouteBtnMobile');
+    
+    if (routeInfo) routeInfo.classList.add('hidden');
+    if (routeInfoMobile) routeInfoMobile.classList.add('hidden');
+    if (navigateSection) navigateSection.classList.add('hidden');
+    if (navigateSectionMobile) navigateSectionMobile.classList.add('hidden');
+    if (clearRouteBtn) clearRouteBtn.classList.add('hidden');
+    if (clearRouteBtnMobile) clearRouteBtnMobile.classList.add('hidden');
+    
+    // Clear addresses
+    currentRouteAddresses = null;
+    
+    console.log('Route cleared');
+}
 
 // Close modal when clicking outside
 document.addEventListener('click', (e) => {

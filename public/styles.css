@@ -436,6 +436,28 @@ button[type="submit"]:disabled {
     background: #1d4ed8;
 }
 
+.clear-route-btn {
+    width: 100%;
+    padding: 12px;
+    background: #dc2626;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.2s;
+    margin-top: 24px;
+}
+
+.clear-route-btn:hover {
+    background: #b91c1c;
+}
+
+.clear-route-btn:active {
+    background: #991b1b;
+}
+
 @media (prefers-color-scheme: dark) {
     .weather-summary-btn {
         background: #2563eb;
@@ -447,6 +469,18 @@ button[type="submit"]:disabled {
     
     .weather-summary-btn:active {
         background: #1e40af;
+    }
+    
+    .clear-route-btn {
+        background: #b91c1c;
+    }
+    
+    .clear-route-btn:hover {
+        background: #991b1b;
+    }
+    
+    .clear-route-btn:active {
+        background: #7f1d1d;
     }
 }
 
@@ -695,6 +729,10 @@ button[type="submit"]:disabled {
 /* Mobile Carousel */
 .mobile-carousel-wrapper {
     display: none; /* Hidden on desktop */
+}
+
+.desktop-only {
+    display: block;
 }
 
 .mobile-carousel-container {
@@ -1067,17 +1105,24 @@ button[type="submit"]:disabled {
         display: none !important;
     }
     
+    .desktop-only {
+        display: none !important;
+    }
+    
     .mobile-carousel-wrapper {
         display: block !important;
     }
     
     .mobile-carousel-slide {
-        padding: 0;
+        padding: 0 16px;
+        box-sizing: border-box;
     }
     
     .mobile-carousel-slide .input-group input,
+    .mobile-carousel-slide .input-wrapper,
     .mobile-carousel-slide button[type="submit"] {
-        width: calc(100% - 10px);
+        width: 100%;
+        box-sizing: border-box;
     }
     
     .route-info.hidden {
