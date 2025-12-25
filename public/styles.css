@@ -623,8 +623,8 @@ button[type="submit"]:disabled {
 
 @media (prefers-color-scheme: dark) {
     .legend-button {
-        background: #374151;
-        border-color: #4b5563;
+        background: #111827;
+        border-color: #374151;
     }
 }
 
@@ -673,7 +673,7 @@ button[type="submit"]:disabled {
 
 @media (prefers-color-scheme: dark) {
     .legend-modal-content {
-        background: #1f2937;
+        background: #111827;
     }
 }
 
@@ -829,7 +829,7 @@ button[type="submit"]:disabled {
         box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.3);
         z-index: 1000;
         transition: transform 0.3s ease;
-        transform: translateY(calc(100% - 70px)); /* Show only header */
+        transform: translateY(calc(100% - 100px)); /* Show header including border */
         overflow: hidden;
         border-radius: 20px 20px 0 0;
     }

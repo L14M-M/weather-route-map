@@ -26,7 +26,7 @@ loadConfig();
 // Load Google Places API dynamically
 function loadGooglePlacesAPI() {
     const script = document.createElement('script');
-    script.src = `https://maps.googleapis.com/maps/api/js?key=${GOOGLE_API_KEY}&libraries=places&callback=initGooglePlaces`;
+    script.src = `https://maps.googleapis.com/maps/api/js?key=${GOOGLE_API_KEY}&libraries=places&loading=async&callback=initGooglePlaces`;
     script.async = true;
     script.defer = true;
     document.head.appendChild(script);
@@ -817,7 +817,10 @@ window.addEventListener('resize', () => {
     const sections = ['routeInfoContent', 'legendContent'];
     sections.forEach(id => {
         const content = document.getElementById(id);
+        if (!content) return; // Skip if element doesn't exist
+        
         const header = content.previousElementSibling;
+        if (!header) return; // Skip if no header found
         
         if (window.innerWidth > 768) {
             // Desktop: remove collapsed state and clear inline styles
@@ -872,11 +875,11 @@ function initDrawerSwipe() {
                 sidebar.style.transform = `translateY(${deltaY}px)`;
             }
         } else {
-            // When closed (at translateY(calc(100% - 70px))), allow dragging up
+            // When closed (at translateY(calc(100% - 100px))), allow dragging up
             if (deltaY < 0) {
                 // Start from closed position and move up as user drags
                 const sidebarHeight = sidebar.offsetHeight;
-                const closedOffset = sidebarHeight - 70; // The "100% - 70px" in pixels
+                const closedOffset = sidebarHeight - 100; // The "100% - 100px" in pixels
                 const dragAmount = Math.abs(deltaY);
                 const newOffset = Math.max(0, closedOffset - dragAmount);
                 sidebar.style.transform = `translateY(${newOffset}px)`;
