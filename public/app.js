@@ -602,9 +602,44 @@ function displayRouteWithWeather(route, weatherData) {
         }
     }
     
-    // Create colored segments based on weather
+    // Remove old outline layer
+    if (map.getLayer('route-outline')) {
+        map.removeLayer('route-outline');
+    }
+    if (map.getSource('route-outline')) {
+        map.removeSource('route-outline');
+    }
+    
+    // Create a single outline layer for the entire route
     const routeCoords = route.geometry.coordinates;
     
+    map.addSource('route-outline', {
+        type: 'geojson',
+        data: {
+            type: 'Feature',
+            geometry: {
+                type: 'LineString',
+                coordinates: routeCoords
+            }
+        }
+    });
+    
+    map.addLayer({
+        id: 'route-outline',
+        type: 'line',
+        source: 'route-outline',
+        layout: {
+            'line-join': 'round',
+            'line-cap': 'round'
+        },
+        paint: {
+            'line-color': '#000000',
+            'line-width': 10,
+            'line-opacity': 0.4
+        }
+    });
+    
+    // Create colored segments based on weather
     // For each weather point, create a colored segment
     for (let i = 0; i < weatherData.length - 1; i++) {
         const startWeather = weatherData[i];
@@ -648,23 +683,7 @@ function displayRouteWithWeather(route, weatherData) {
             }
         });
         
-        // Add outline layer (drawn first, underneath)
-        map.addLayer({
-            id: `route-segment-${i}-outline`,
-            type: 'line',
-            source: `route-segment-${i}`,
-            layout: {
-                'line-join': 'round',
-                'line-cap': 'round'
-            },
-            paint: {
-                'line-color': '#000000',
-                'line-width': 10,
-                'line-opacity': 0.4
-            }
-        });
-        
-        // Add colored route layer on top
+        // Add colored route segment
         map.addLayer({
             id: `route-segment-${i}`,
             type: 'line',
@@ -882,12 +901,17 @@ function clearMap() {
         if (map.getLayer(`route-segment-${i}`)) {
             map.removeLayer(`route-segment-${i}`);
         }
-        if (map.getLayer(`route-segment-${i}-outline`)) {
-            map.removeLayer(`route-segment-${i}-outline`);
-        }
         if (map.getSource(`route-segment-${i}`)) {
             map.removeSource(`route-segment-${i}`);
         }
+    }
+    
+    // Remove outline layer
+    if (map.getLayer('route-outline')) {
+        map.removeLayer('route-outline');
+    }
+    if (map.getSource('route-outline')) {
+        map.removeSource('route-outline');
     }
     
     // Remove old single route layer (legacy)
