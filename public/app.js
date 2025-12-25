@@ -1267,6 +1267,9 @@ window.addEventListener('load', () => {
 
 // Clear route, cache, and inputs
 function clearRoute() {
+    // Confirm before clearing
+    if (!confirm('Are you sure you want to clear this route?')) return;
+    
     // Clear sessionStorage
     sessionStorage.removeItem('cachedRoute');
     
