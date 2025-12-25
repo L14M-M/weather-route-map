@@ -86,6 +86,21 @@ function initializeMap() {
         setTimeout(() => {
             map.resize();
         }, 100);
+        
+        // Restore cached route when map loads
+        restoreRouteFromCache();
+    });
+    
+    // Also restore when map style finishes loading (happens on app resume)
+    map.on('styledata', () => {
+        // Only restore if we have cached data and layers were cleared
+        const cached = sessionStorage.getItem('cachedRoute');
+        if (cached && !map.getSource('route-segment-0')) {
+            console.log('Map style reloaded, restoring route...');
+            setTimeout(() => {
+                restoreRouteFromCache();
+            }, 100);
+        }
     });
     
     // Get user location after map is initialized
