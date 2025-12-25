@@ -648,6 +648,23 @@ function displayRouteWithWeather(route, weatherData) {
             }
         });
         
+        // Add outline layer (drawn first, underneath)
+        map.addLayer({
+            id: `route-segment-${i}-outline`,
+            type: 'line',
+            source: `route-segment-${i}`,
+            layout: {
+                'line-join': 'round',
+                'line-cap': 'round'
+            },
+            paint: {
+                'line-color': '#000000',
+                'line-width': 10,
+                'line-opacity': 0.4
+            }
+        });
+        
+        // Add colored route layer on top
         map.addLayer({
             id: `route-segment-${i}`,
             type: 'line',
@@ -864,6 +881,9 @@ function clearMap() {
     for (let i = 0; i < 100; i++) {
         if (map.getLayer(`route-segment-${i}`)) {
             map.removeLayer(`route-segment-${i}`);
+        }
+        if (map.getLayer(`route-segment-${i}-outline`)) {
+            map.removeLayer(`route-segment-${i}-outline`);
         }
         if (map.getSource(`route-segment-${i}`)) {
             map.removeSource(`route-segment-${i}`);
