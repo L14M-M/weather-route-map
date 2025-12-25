@@ -1108,6 +1108,13 @@ function restoreRouteFromCache() {
         
         const { route, weatherData, addresses, departureTime } = JSON.parse(cached);
         
+        // Make sure map is ready before restoring
+        if (!map || !map.loaded()) {
+            console.log('Map not ready, will retry...');
+            setTimeout(restoreRouteFromCache, 200);
+            return;
+        }
+        
         // Restore addresses
         currentRouteAddresses = addresses;
         
@@ -1126,6 +1133,9 @@ function restoreRouteFromCache() {
         if (endInputMobile) endInputMobile.value = addresses.end;
         if (departureInputMobile) departureInputMobile.value = departureTime;
         
+        // Clear existing route layers first
+        clearMap();
+        
         // Restore map and UI
         displayRouteWithWeather(route, weatherData);
         displayRouteInfo(route, weatherData, false);
@@ -1140,16 +1150,22 @@ function restoreRouteFromCache() {
 // Listen for page visibility changes to restore route
 document.addEventListener('visibilitychange', () => {
     if (!document.hidden && map) {
-        // Page became visible - check if we need to restore route
-        restoreRouteFromCache();
+        // Page became visible - wait a bit for map to be ready, then restore
+        setTimeout(() => {
+            restoreRouteFromCache();
+        }, 100);
     }
 });
 
 // Restore route on initial page load
 window.addEventListener('load', () => {
-    if (map) {
-        restoreRouteFromCache();
-    }
+    // Wait for map to be fully initialized
+    const checkMapReady = setInterval(() => {
+        if (map && map.loaded()) {
+            clearInterval(checkMapReady);
+            restoreRouteFromCache();
+        }
+    }, 100);
 });
 
 // Close modal when clicking outside
