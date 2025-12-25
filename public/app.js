@@ -346,6 +346,12 @@ async function getRouteWithWeather(start, end, departureTime, isMobile = false) 
         // Step 6: Show route information
         displayRouteInfo(route, weatherData, isMobile);
         
+        // Store current route data for saving
+        currentRouteData = {
+            route,
+            distance: `${(route.distance / 1609.34).toFixed(1)} miles`
+        };
+        
         // Save route to sessionStorage for persistence
         saveRouteToCache({
             route,
@@ -364,7 +370,7 @@ async function getRouteWithWeather(start, end, departureTime, isMobile = false) 
         // Close drawer on mobile after route is calculated
         if (window.innerWidth <= 768) {
             const sidebar = document.querySelector('.sidebar');
-            sidebar.classList.remove('open');
+            sidebar.classList.add('closed');
         }
     } catch (error) {
         showLoading(false, isMobile);
@@ -822,6 +828,7 @@ function displayRouteInfo(route, weatherData, isMobile = false) {
     const weatherModalContent = document.getElementById('weatherModalContent');
     const routeInfo = document.getElementById('routeInfo');
     const navigateSection = document.getElementById('navigateSection');
+    const saveRouteBtn = document.getElementById('saveRouteBtn');
     const clearRouteBtn = document.getElementById('clearRouteBtn');
     
     if (distance) distance.textContent = distanceText;
@@ -829,6 +836,7 @@ function displayRouteInfo(route, weatherData, isMobile = false) {
     if (weatherModalContent) weatherModalContent.innerHTML = summaryHTML;
     if (routeInfo) routeInfo.classList.remove('hidden');
     if (navigateSection) navigateSection.classList.remove('hidden');
+    if (saveRouteBtn) saveRouteBtn.classList.remove('hidden');
     if (clearRouteBtn) clearRouteBtn.classList.remove('hidden');
     
     // Update mobile route info (shares same weather modal)
@@ -836,12 +844,14 @@ function displayRouteInfo(route, weatherData, isMobile = false) {
     const durationMobile = document.getElementById('durationMobile');
     const routeInfoMobile = document.getElementById('routeInfoMobile');
     const navigateSectionMobile = document.getElementById('navigateSectionMobile');
+    const saveRouteBtnMobile = document.getElementById('saveRouteBtnMobile');
     const clearRouteBtnMobile = document.getElementById('clearRouteBtnMobile');
     
     if (distanceMobile) distanceMobile.textContent = distanceText;
     if (durationMobile) durationMobile.textContent = durationText;
     if (routeInfoMobile) routeInfoMobile.classList.remove('hidden');
     if (navigateSectionMobile) navigateSectionMobile.classList.remove('hidden');
+    if (saveRouteBtnMobile) saveRouteBtnMobile.classList.remove('hidden');
     if (clearRouteBtnMobile) clearRouteBtnMobile.classList.remove('hidden');
 }
 
@@ -972,7 +982,7 @@ window.addEventListener('resize', () => {
 function toggleDrawer() {
     if (window.innerWidth <= 768) {
         const sidebar = document.querySelector('.sidebar');
-        sidebar.classList.toggle('open');
+        sidebar.classList.toggle('closed');
     }
 }
 
@@ -1002,9 +1012,9 @@ function initDrawerSwipe() {
         touchEndY = e.touches[0].clientY;
         const deltaY = touchEndY - touchStartY;
         
-        const isOpen = sidebar.classList.contains('open');
+        const isClosed = sidebar.classList.contains('closed');
         
-        if (isOpen) {
+        if (!isClosed) {
             // When open (at translateY(0)), allow dragging down
             if (deltaY > 0) {
                 sidebar.style.transform = `translateY(${deltaY}px)`;
@@ -1033,14 +1043,14 @@ function initDrawerSwipe() {
         const deltaY = touchEndY - touchStartY;
         const threshold = 50; // Minimum swipe distance in pixels
         
-        const isOpen = sidebar.classList.contains('open');
+        const isClosed = sidebar.classList.contains('closed');
         
-        if (deltaY < 0 && !isOpen && swipeDistance > threshold) {
+        if (deltaY < 0 && isClosed && swipeDistance > threshold) {
             // Swipe up when closed - open drawer
-            sidebar.classList.add('open');
-        } else if (deltaY > 0 && isOpen && swipeDistance > threshold) {
+            sidebar.classList.remove('closed');
+        } else if (deltaY > 0 && !isClosed && swipeDistance > threshold) {
             // Swipe down when open - close drawer
-            sidebar.classList.remove('open');
+            sidebar.classList.add('closed');
         }
         
         // Reset
@@ -1200,6 +1210,13 @@ function restoreRouteFromCache() {
                 // Restore map and UI
                 displayRouteWithWeather(route, weatherData);
                 displayRouteInfo(route, weatherData, false);
+                
+                // Set currentRouteData for saving functionality
+                currentRouteData = {
+                    route,
+                    distance: `${(route.distance / 1609.34).toFixed(1)} miles`
+                };
+                
                 console.log('✓ Route successfully restored from cache');
             } catch (e) {
                 console.error('Error displaying route:', e);
@@ -1227,6 +1244,18 @@ document.addEventListener('visibilitychange', () => {
 
 // Restore route on initial page load
 window.addEventListener('load', () => {
+    // Check if there's a cached route and close drawer if so
+    if (window.innerWidth <= 768) {
+        const cached = sessionStorage.getItem('cachedRoute');
+        const sidebar = document.querySelector('.sidebar');
+        
+        if (cached && sidebar) {
+            // There's a cached route, start with drawer closed
+            sidebar.classList.add('closed');
+        }
+        // If no cached route, drawer stays open (default state)
+    }
+    
     // Wait for map to be fully initialized
     const checkMapReady = setInterval(() => {
         if (map && map.loaded()) {
@@ -1264,6 +1293,8 @@ function clearRoute() {
     const routeInfoMobile = document.getElementById('routeInfoMobile');
     const navigateSection = document.getElementById('navigateSection');
     const navigateSectionMobile = document.getElementById('navigateSectionMobile');
+    const saveRouteBtn = document.getElementById('saveRouteBtn');
+    const saveRouteBtnMobile = document.getElementById('saveRouteBtnMobile');
     const clearRouteBtn = document.getElementById('clearRouteBtn');
     const clearRouteBtnMobile = document.getElementById('clearRouteBtnMobile');
     
@@ -1271,6 +1302,8 @@ function clearRoute() {
     if (routeInfoMobile) routeInfoMobile.classList.add('hidden');
     if (navigateSection) navigateSection.classList.add('hidden');
     if (navigateSectionMobile) navigateSectionMobile.classList.add('hidden');
+    if (saveRouteBtn) saveRouteBtn.classList.add('hidden');
+    if (saveRouteBtnMobile) saveRouteBtnMobile.classList.add('hidden');
     if (clearRouteBtn) clearRouteBtn.classList.add('hidden');
     if (clearRouteBtnMobile) clearRouteBtnMobile.classList.add('hidden');
     
@@ -1280,10 +1313,205 @@ function clearRoute() {
     console.log('Route cleared');
 }
 
+// Toggle map menu
+function toggleMapMenu() {
+    const mapMenu = document.getElementById('mapMenu');
+    if (mapMenu) {
+        mapMenu.classList.toggle('hidden');
+    }
+}
+
+// Saved Routes Management
+let currentRouteData = null; // Store current route for saving
+let inputModalCallback = null; // Callback for input modal
+
+// Custom input modal functions
+function showInputModal(title, placeholder, defaultValue, callback) {
+    const modal = document.getElementById('inputModal');
+    const titleEl = document.getElementById('inputModalTitle');
+    const inputField = document.getElementById('inputModalField');
+    
+    titleEl.textContent = title;
+    inputField.placeholder = placeholder;
+    inputField.value = defaultValue || '';
+    inputModalCallback = callback;
+    
+    modal.classList.remove('hidden');
+    inputField.focus();
+    inputField.select();
+}
+
+function closeInputModal() {
+    const modal = document.getElementById('inputModal');
+    const inputField = document.getElementById('inputModalField');
+    
+    modal.classList.add('hidden');
+    inputField.value = '';
+    inputModalCallback = null;
+}
+
+function confirmInputModal() {
+    const inputField = document.getElementById('inputModalField');
+    const value = inputField.value.trim();
+    
+    if (value && inputModalCallback) {
+        inputModalCallback(value);
+    }
+    
+    closeInputModal();
+}
+
+// Handle Enter key in input modal
+document.addEventListener('DOMContentLoaded', () => {
+    const inputField = document.getElementById('inputModalField');
+    if (inputField) {
+        inputField.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                confirmInputModal();
+            }
+        });
+    }
+});
+
+// Save current route to localStorage
+function saveCurrentRoute() {
+    if (!currentRouteAddresses || !currentRouteData) {
+        alert('No route to save!');
+        return;
+    }
+    
+    const defaultName = `${currentRouteAddresses.start} → ${currentRouteAddresses.end}`;
+    
+    showInputModal(
+        'Save Route',
+        'Enter a name for this route',
+        defaultName,
+        (routeName) => {
+            const savedRoute = {
+                id: Date.now(),
+                name: routeName,
+                startAddress: currentRouteAddresses.start,
+                endAddress: currentRouteAddresses.end,
+                distance: currentRouteData.distance,
+                route: currentRouteData.route
+            };
+            
+            const savedRoutes = JSON.parse(localStorage.getItem('savedRoutes') || '[]');
+            savedRoutes.push(savedRoute);
+            localStorage.setItem('savedRoutes', JSON.stringify(savedRoutes));
+            
+            // Show success feedback
+            const saveBtn = document.getElementById('saveRouteBtn');
+            const saveBtnMobile = document.getElementById('saveRouteBtnMobile');
+            const originalText = saveBtn?.textContent;
+            
+            if (saveBtn) saveBtn.textContent = '✓ Saved!';
+            if (saveBtnMobile) saveBtnMobile.textContent = '✓ Saved!';
+            
+            setTimeout(() => {
+                if (saveBtn) saveBtn.textContent = originalText;
+                if (saveBtnMobile) saveBtnMobile.textContent = originalText;
+            }, 2000);
+        }
+    );
+}
+
+// Load a saved route
+async function loadSavedRoute(routeId) {
+    const savedRoutes = JSON.parse(localStorage.getItem('savedRoutes') || '[]');
+    const route = savedRoutes.find(r => r.id === routeId);
+    
+    if (!route) {
+        alert('Route not found!');
+        return;
+    }
+    
+    // Close the modal
+    toggleSavedRoutesModal();
+    
+    // Set the form inputs
+    const startInput = document.getElementById('startLocation');
+    const endInput = document.getElementById('endLocation');
+    const startInputMobile = document.getElementById('startLocationMobile');
+    const endInputMobile = document.getElementById('endLocationMobile');
+    
+    if (startInput) startInput.value = route.startAddress;
+    if (endInput) endInput.value = route.endAddress;
+    if (startInputMobile) startInputMobile.value = route.startAddress;
+    if (endInputMobile) endInputMobile.value = route.endAddress;
+    
+    // Set departure time to now
+    const now = new Date();
+    const localDateTime = new Date(now.getTime() - now.getTimezoneOffset() * 60000).toISOString().slice(0, 16);
+    const departureInput = document.getElementById('departureTime');
+    const departureInputMobile = document.getElementById('departureTimeMobile');
+    if (departureInput) departureInput.value = localDateTime;
+    if (departureInputMobile) departureInputMobile.value = localDateTime;
+    
+    // Trigger route calculation
+    document.getElementById('routeForm').dispatchEvent(new Event('submit'));
+}
+
+// Delete a saved route
+function deleteSavedRoute(routeId) {
+    if (!confirm('Are you sure you want to delete this route?')) return;
+    
+    const savedRoutes = JSON.parse(localStorage.getItem('savedRoutes') || '[]');
+    const filteredRoutes = savedRoutes.filter(r => r.id !== routeId);
+    localStorage.setItem('savedRoutes', JSON.stringify(filteredRoutes));
+    
+    // Refresh the modal
+    displaySavedRoutes();
+}
+
+// Display saved routes in modal
+function displaySavedRoutes() {
+    const savedRoutes = JSON.parse(localStorage.getItem('savedRoutes') || '[]');
+    const content = document.getElementById('savedRoutesContent');
+    
+    if (savedRoutes.length === 0) {
+        content.innerHTML = '<p style="color: #9ca3af; text-align: center; padding: 20px;">No saved routes yet. Save a route to see it here!</p>';
+        return;
+    }
+    
+    content.innerHTML = savedRoutes.map(route => `
+        <div class="saved-route-item">
+            <div class="saved-route-info">
+                <div class="saved-route-name">${route.name}</div>
+                <div class="saved-route-details">
+                    <span>${route.startAddress}</span>
+                    <span style="color: #9ca3af; margin: 0 8px;">→</span>
+                    <span>${route.endAddress}</span>
+                </div>
+                <div class="saved-route-distance">${route.distance}</div>
+            </div>
+            <div class="saved-route-actions">
+                <button class="saved-route-btn load-btn" onclick="loadSavedRoute(${route.id})">Load</button>
+                <button class="saved-route-btn delete-btn" onclick="deleteSavedRoute(${route.id})">Delete</button>
+            </div>
+        </div>
+    `).join('');
+}
+
+// Toggle saved routes modal
+function toggleSavedRoutesModal() {
+    const modal = document.getElementById('savedRoutesModal');
+    if (modal) {
+        const isHidden = modal.classList.toggle('hidden');
+        if (!isHidden) {
+            displaySavedRoutes();
+        }
+    }
+}
+
 // Close modal when clicking outside
 document.addEventListener('click', (e) => {
     const legendModal = document.getElementById('legendModal');
     const weatherModal = document.getElementById('weatherModal');
+    const savedRoutesModal = document.getElementById('savedRoutesModal');
+    const inputModal = document.getElementById('inputModal');
+    const mapMenu = document.getElementById('mapMenu');
+    const menuButton = document.getElementById('menuButton');
     
     if (e.target === legendModal) {
         legendModal.classList.add('hidden');
@@ -1291,6 +1519,19 @@ document.addEventListener('click', (e) => {
     
     if (e.target === weatherModal) {
         weatherModal.classList.add('hidden');
+    }
+    
+    if (e.target === savedRoutesModal) {
+        savedRoutesModal.classList.add('hidden');
+    }
+    
+    if (e.target === inputModal) {
+        closeInputModal();
+    }
+    
+    // Close map menu when clicking outside
+    if (mapMenu && !mapMenu.contains(e.target) && !menuButton.contains(e.target)) {
+        mapMenu.classList.add('hidden');
     }
 });
 

@@ -59,7 +59,7 @@
                     
                     <div id="routeInfo" class="route-info hidden">
                         <h3 class="collapsible-header" onclick="toggleSection('routeInfoContent')">
-                            Route Details
+                            Details
                             <span class="toggle-icon">▼</span>
                         </h3>
                         <div id="routeInfoContent" class="collapsible-content">
@@ -91,6 +91,11 @@
                             </button>
                         </div>
                     </div>
+                    
+                    <!-- Desktop Save Route button -->
+                    <button id="saveRouteBtn" class="save-route-btn desktop-only hidden" onclick="saveCurrentRoute()">
+                        ⭐ Save Route
+                    </button>
                 </div>
                 
                 <!-- Desktop Clear Route button at bottom -->
@@ -141,7 +146,7 @@
                         <!-- Slide 2: Route Details -->
                         <div class="mobile-carousel-slide">
                             <div id="routeInfoMobile" class="route-info hidden">
-                                <h3>Route Details</h3>
+                                <h3>Details</h3>
                                 <div class="info-item">
                                     <strong>Distance:</strong> <span id="distanceMobile"></span>
                                 </div>
@@ -170,6 +175,11 @@
                                 </div>
                             </div>
                             
+                            <!-- Save Route button -->
+                            <button id="saveRouteBtnMobile" class="save-route-btn hidden" onclick="saveCurrentRoute()">
+                                ⭐ Save Route
+                            </button>
+                            
                             <div class="mobile-route-placeholder">
                                 <p>📍 Enter your route details and calculate to see results here</p>
                             </div>
@@ -189,10 +199,26 @@
         </div>
         
         <div id="map" class="map">
-            <!-- Legend button on map -->
-            <button id="legendButton" class="legend-button" onclick="toggleLegendModal()">
-                <span>🌦️</span>
+            <!-- Hamburger menu button on map -->
+            <button id="menuButton" class="menu-button" onclick="toggleMapMenu()">
+                <div class="hamburger-icon">
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                </div>
             </button>
+            
+            <!-- Floating menu -->
+            <div id="mapMenu" class="map-menu hidden">
+                <button class="map-menu-item" onclick="toggleLegendModal(); toggleMapMenu();">
+                    <span class="menu-icon">🌦️</span>
+                    <span>Conditions Legend</span>
+                </button>
+                <button class="map-menu-item" onclick="toggleSavedRoutesModal(); toggleMapMenu();">
+                    <span class="menu-icon">⭐</span>
+                    <span>Saved Routes</span>
+                </button>
+            </div>
         </div>
         
         <!-- Legend Modal -->
@@ -256,6 +282,36 @@
                 </div>
                 <div class="legend-modal-body" id="weatherModalContent">
                     <!-- Weather summary will be inserted here -->
+                </div>
+            </div>
+        </div>
+        
+        <!-- Saved Routes Modal -->
+        <div id="savedRoutesModal" class="legend-modal hidden">
+            <div class="legend-modal-content">
+                <div class="legend-modal-header">
+                    <h4>Saved Routes</h4>
+                    <button class="close-modal" onclick="toggleSavedRoutesModal()">×</button>
+                </div>
+                <div class="legend-modal-body" id="savedRoutesContent">
+                    <!-- Saved routes will be inserted here -->
+                </div>
+            </div>
+        </div>
+        
+        <!-- Input Modal (for route name) -->
+        <div id="inputModal" class="legend-modal hidden">
+            <div class="legend-modal-content input-modal-content">
+                <div class="legend-modal-header">
+                    <h4 id="inputModalTitle">Enter Route Name</h4>
+                    <button class="close-modal" onclick="closeInputModal()">×</button>
+                </div>
+                <div class="legend-modal-body">
+                    <input type="text" id="inputModalField" class="input-modal-field" placeholder="Enter name...">
+                    <div class="input-modal-actions">
+                        <button class="input-modal-btn cancel-btn" onclick="closeInputModal()">Cancel</button>
+                        <button class="input-modal-btn confirm-btn" onclick="confirmInputModal()">Save</button>
+                    </div>
                 </div>
             </div>
         </div>
