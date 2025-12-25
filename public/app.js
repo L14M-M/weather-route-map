@@ -76,8 +76,8 @@ function initializeMap() {
     // Listen for system color scheme changes
     window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', (e) => {
         const newStyle = e.matches 
-            ? 'mapbox://styles/mapbox/dark-v11' 
-            : 'mapbox://styles/mapbox/streets-v12';
+            ? 'mapbox://styles/mapbox/navigation-night-v1' 
+            : 'mapbox://styles/mapbox/navigation-day-v1';
         map.setStyle(newStyle);
     });
     
