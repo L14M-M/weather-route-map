@@ -63,10 +63,26 @@
                             <div class="info-item">
                                 <strong>Duration:</strong> <span id="duration"></span>
                             </div>
-                            <div class="info-item">
-                                <strong>Weather Summary:</strong>
-                                <div id="weatherSummary"></div>
-                            </div>
+                            <button id="weatherSummaryBtn" class="weather-summary-btn" onclick="toggleWeatherModal()">
+                                View Weather Summary
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div id="navigateSection" class="navigate-section hidden">
+                        <button class="navigate-toggle-btn" onclick="toggleNavigateMenu()">
+                            📍 Open Route In...
+                        </button>
+                        <div id="navigateMenu" class="navigate-menu hidden">
+                            <button onclick="openInAppleMaps()" class="navigate-option">
+                                🗺️ Apple Maps
+                            </button>
+                            <button onclick="openInWaze()" class="navigate-option">
+                                📍 Waze
+                            </button>
+                            <button onclick="openInGoogleMaps()" class="navigate-option">
+                                🌐 Google Maps
+                            </button>
                         </div>
                     </div>
                 </div>
@@ -117,9 +133,25 @@
                                 <div class="info-item">
                                     <strong>Duration:</strong> <span id="durationMobile"></span>
                                 </div>
-                                <div class="info-item">
-                                    <strong>Weather Summary:</strong>
-                                    <div id="weatherSummaryMobile"></div>
+                                <button id="weatherSummaryBtnMobile" class="weather-summary-btn" onclick="toggleWeatherModal()">
+                                    View Weather Summary
+                                </button>
+                            </div>
+                            
+                            <div id="navigateSectionMobile" class="navigate-section hidden">
+                                <button class="navigate-toggle-btn" onclick="toggleNavigateMenu()">
+                                    📍 Open Route In...
+                                </button>
+                                <div id="navigateMenuMobile" class="navigate-menu hidden">
+                                    <button onclick="openInAppleMaps()" class="navigate-option">
+                                        🗺️ Apple Maps
+                                    </button>
+                                    <button onclick="openInWaze()" class="navigate-option">
+                                        📍 Waze
+                                    </button>
+                                    <button onclick="openInGoogleMaps()" class="navigate-option">
+                                        🌐 Google Maps
+                                    </button>
                                 </div>
                             </div>
                             <div class="mobile-route-placeholder">
@@ -193,8 +225,21 @@
                 </div>
             </div>
         </div>
+        
+        <!-- Weather Summary Modal -->
+        <div id="weatherModal" class="legend-modal hidden">
+            <div class="legend-modal-content">
+                <div class="legend-modal-header">
+                    <h4>Weather Summary</h4>
+                    <button class="close-modal" onclick="toggleWeatherModal()">×</button>
+                </div>
+                <div class="legend-modal-body" id="weatherModalContent">
+                    <!-- Weather summary will be inserted here -->
+                </div>
+            </div>
+        </div>
     </div>
-    
+
     <script src='https://api.mapbox.com/mapbox-gl-js/v3.0.1/mapbox-gl.js'></script>
     <script src="/app.js"></script>
 </body>

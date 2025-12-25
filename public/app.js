@@ -95,6 +95,7 @@ function initializeMap() {
 // State management
 let map = null;
 let weatherMarkers = [];
+let currentRouteAddresses = { start: '', end: '', startCoords: null, endCoords: null };
 
 // Set default departure time to now (in local timezone)
 function setDefaultDepartureTime() {
@@ -299,6 +300,14 @@ async function getRouteWithWeather(start, end, departureTime, isMobile = false) 
         // Step 1: Geocode locations
         const startCoords = await geocodeLocation(start);
         const endCoords = await geocodeLocation(end);
+        
+        // Store route addresses for navigation
+        currentRouteAddresses = {
+            start: start,
+            end: end,
+            startCoords: startCoords,
+            endCoords: endCoords
+        };
         
         // Step 2: Get route from Mapbox
         const route = await getRoute(startCoords, endCoords);
@@ -679,39 +688,127 @@ function displayRouteInfo(route, weatherData, isMobile = false) {
         ? `${hours}h ${minutes}m` 
         : `${minutes}m`;
     
-    // Weather summary
-    const weatherCounts = {};
-    weatherData.forEach(w => {
-        const desc = getWeatherDescription(w.weatherCode);
-        weatherCounts[desc] = (weatherCounts[desc] || 0) + 1;
-    });
+    // Weather summary - smart display
+    const totalDistance = route.distance / 1609.34; // Convert to miles
+    const badWeatherCodes = [45, 48, 51, 53, 55, 56, 57, 61, 63, 65, 66, 67, 71, 73, 75, 77, 80, 81, 82, 85, 86, 95, 96, 99];
     
-    const summaryHTML = Object.entries(weatherCounts)
-        .sort((a, b) => b[1] - a[1])
-        .map(([desc, count]) => `<div>${desc} (${count} points)</div>`)
-        .join('');
+    // Check if all weather is good (clear or cloudy only)
+    const allGood = weatherData.every(w => w.weatherCode <= 3);
+    
+    let summaryHTML = '';
+    
+    if (allGood) {
+        summaryHTML = '<div style="color: #4ade80; font-weight: 500;">✓ Good conditions throughout route</div>';
+    } else {
+        // Categorize weather types
+        const getWeatherCategory = (code) => {
+            if (code >= 95) return 'Thunderstorm';
+            if (code >= 85 || (code >= 71 && code <= 77)) {
+                // Heavy snow codes: 75, 77, 86
+                if (code === 75 || code === 77 || code === 86) return 'Heavy snow';
+                return 'Snow';
+            }
+            if (code >= 61 || (code >= 51 && code <= 57) || (code >= 80 && code <= 82)) {
+                // Heavy rain codes: 65, 67, 82
+                if (code === 65 || code === 67 || code === 82) return 'Heavy rain';
+                return 'Rain';
+            }
+            if (code === 45 || code === 48) return 'Fog';
+            return null;
+        };
+        
+        // Find bad weather segments and merge same categories
+        const alerts = [];
+        let currentBadWeather = null;
+        
+        weatherData.forEach((w, index) => {
+            const category = getWeatherCategory(w.weatherCode);
+            const isBad = category !== null;
+            const distanceAtPoint = (index / (weatherData.length - 1)) * totalDistance;
+            
+            if (isBad && !currentBadWeather) {
+                // Start of bad weather segment
+                currentBadWeather = {
+                    condition: category,
+                    startMile: distanceAtPoint,
+                    startTime: w.time
+                };
+            } else if (!isBad && currentBadWeather) {
+                // End of bad weather segment
+                currentBadWeather.endMile = distanceAtPoint;
+                currentBadWeather.endTime = weatherData[index - 1].time;
+                alerts.push(currentBadWeather);
+                currentBadWeather = null;
+            } else if (isBad && currentBadWeather && category !== currentBadWeather.condition) {
+                // Weather category changed
+                currentBadWeather.endMile = distanceAtPoint;
+                currentBadWeather.endTime = weatherData[index - 1].time;
+                alerts.push(currentBadWeather);
+                currentBadWeather = {
+                    condition: category,
+                    startMile: distanceAtPoint,
+                    startTime: w.time
+                };
+            }
+        });
+        
+        // Close final segment if needed
+        if (currentBadWeather) {
+            currentBadWeather.endMile = totalDistance;
+            currentBadWeather.endTime = weatherData[weatherData.length - 1].time;
+            alerts.push(currentBadWeather);
+        }
+        
+        // Format alerts
+        if (alerts.length === 0) {
+            summaryHTML = '<div style="color: #4ade80; font-weight: 500;">✓ Good conditions throughout route</div>';
+        } else {
+            summaryHTML = alerts.map(alert => {
+                const startMile = alert.startMile.toFixed(0);
+                const endMile = alert.endMile.toFixed(0);
+                const startTime = alert.startTime.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' });
+                const endTime = alert.endTime.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' });
+                
+                // Choose emoji based on condition
+                let emoji = '⚠️';
+                if (alert.condition.toLowerCase().includes('rain')) {
+                    emoji = '🌧️';
+                } else if (alert.condition.toLowerCase().includes('snow')) {
+                    emoji = '❄️';
+                } else if (alert.condition.toLowerCase().includes('fog')) {
+                    emoji = '🌫️';
+                } else if (alert.condition.toLowerCase().includes('thunder')) {
+                    emoji = '⛈️';
+                }
+                
+                return `<div style="margin: 4px 0;">${emoji} ${alert.condition} from mile ${startMile} (${startTime}) to mile ${endMile} (${endTime})</div>`;
+            }).join('');
+        }
+    }
     
     // Update desktop route info
     const distance = document.getElementById('distance');
     const duration = document.getElementById('duration');
-    const weatherSummary = document.getElementById('weatherSummary');
+    const weatherModalContent = document.getElementById('weatherModalContent');
     const routeInfo = document.getElementById('routeInfo');
+    const navigateSection = document.getElementById('navigateSection');
     
     if (distance) distance.textContent = distanceText;
     if (duration) duration.textContent = durationText;
-    if (weatherSummary) weatherSummary.innerHTML = summaryHTML;
+    if (weatherModalContent) weatherModalContent.innerHTML = summaryHTML;
     if (routeInfo) routeInfo.classList.remove('hidden');
+    if (navigateSection) navigateSection.classList.remove('hidden');
     
-    // Update mobile route info
+    // Update mobile route info (shares same weather modal)
     const distanceMobile = document.getElementById('distanceMobile');
     const durationMobile = document.getElementById('durationMobile');
-    const weatherSummaryMobile = document.getElementById('weatherSummaryMobile');
     const routeInfoMobile = document.getElementById('routeInfoMobile');
+    const navigateSectionMobile = document.getElementById('navigateSectionMobile');
     
     if (distanceMobile) distanceMobile.textContent = distanceText;
     if (durationMobile) durationMobile.textContent = durationText;
-    if (weatherSummaryMobile) weatherSummaryMobile.innerHTML = summaryHTML;
     if (routeInfoMobile) routeInfoMobile.classList.remove('hidden');
+    if (navigateSectionMobile) navigateSectionMobile.classList.remove('hidden');
 }
 
 // Clear map of route and markers
@@ -769,9 +866,13 @@ function hideError(isMobile = false) {
 
 function hideRouteInfo(isMobile = false) {
     const routeInfoId = isMobile ? 'routeInfoMobile' : 'routeInfo';
+    const navigateSectionId = isMobile ? 'navigateSectionMobile' : 'navigateSection';
+    
     const routeInfo = document.getElementById(routeInfoId);
+    const navigateSection = document.getElementById(navigateSectionId);
     
     if (routeInfo) routeInfo.classList.add('hidden');
+    if (navigateSection) navigateSection.classList.add('hidden');
 }
 
 
@@ -935,11 +1036,53 @@ function toggleLegendModal() {
     modal.classList.toggle('hidden');
 }
 
+// Toggle weather modal
+function toggleWeatherModal() {
+    const modal = document.getElementById('weatherModal');
+    modal.classList.toggle('hidden');
+}
+
+// Toggle navigate menu
+function toggleNavigateMenu() {
+    const menu = document.getElementById('navigateMenu');
+    const menuMobile = document.getElementById('navigateMenuMobile');
+    
+    if (menu) menu.classList.toggle('hidden');
+    if (menuMobile) menuMobile.classList.toggle('hidden');
+}
+
+// Open route in Apple Maps
+function openInAppleMaps() {
+    const { start, end } = currentRouteAddresses;
+    const url = `https://maps.apple.com/?saddr=${encodeURIComponent(start)}&daddr=${encodeURIComponent(end)}`;
+    window.open(url, '_blank');
+}
+
+// Open route in Waze
+function openInWaze() {
+    const { endCoords } = currentRouteAddresses;
+    const url = `https://waze.com/ul?ll=${endCoords[1]},${endCoords[0]}&navigate=yes`;
+    window.open(url, '_blank');
+}
+
+// Open route in Google Maps
+function openInGoogleMaps() {
+    const { start, end } = currentRouteAddresses;
+    const url = `https://www.google.com/maps/dir/?api=1&origin=${encodeURIComponent(start)}&destination=${encodeURIComponent(end)}`;
+    window.open(url, '_blank');
+}
+
 // Close modal when clicking outside
 document.addEventListener('click', (e) => {
-    const modal = document.getElementById('legendModal');
-    if (e.target === modal) {
-        modal.classList.add('hidden');
+    const legendModal = document.getElementById('legendModal');
+    const weatherModal = document.getElementById('weatherModal');
+    
+    if (e.target === legendModal) {
+        legendModal.classList.add('hidden');
+    }
+    
+    if (e.target === weatherModal) {
+        weatherModal.classList.add('hidden');
     }
 });
 
